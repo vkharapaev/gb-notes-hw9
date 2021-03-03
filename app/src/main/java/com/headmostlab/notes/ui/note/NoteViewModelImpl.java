@@ -58,13 +58,4 @@ public class NoteViewModelImpl extends androidx.lifecycle.ViewModel implements N
         }
         this.note.setValue(note);
     }
-//
-//    @Override
-//    public void save(Note newNote) {
-//        Note note = this.note.getValue();
-//        note.setTitle(newNote.getTitle());
-//        note.setDescription(newNote.getDescription());
-//        note.setCreationDate(newNote.getCreationDate());
-//    }
-
 }
