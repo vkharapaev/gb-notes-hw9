@@ -50,8 +50,6 @@ public class NoteFragment extends Fragment {
         viewModel = new ViewModelProvider(this,
                 new NoteViewModelFactory(this, null)).get(NoteViewModelImpl.class);
 
-        setHasOptionsMenu(true);
-
         isPortrait = getResources().getConfiguration().orientation ==
                 Configuration.ORIENTATION_PORTRAIT;
 
@@ -99,6 +97,7 @@ public class NoteFragment extends Fragment {
         if (note == null) {
             binding.deleteNoteButton.setVisibility(View.GONE);
         } else {
+            setHasOptionsMenu(true);
             binding.deleteNoteButton.setOnClickListener(it -> {
                 getParentFragmentManager().setFragmentResult(Constants.FRAGMENT_RESULT_DELETE_NOTE, new Bundle());
                 if (isPortrait) {
