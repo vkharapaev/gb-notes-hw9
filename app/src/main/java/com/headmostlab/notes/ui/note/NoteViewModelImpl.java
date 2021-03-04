@@ -8,7 +8,6 @@ import com.headmostlab.notes.model.Note;
 
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.Date;
 
 public class NoteViewModelImpl extends androidx.lifecycle.ViewModel implements NoteViewModel {
 

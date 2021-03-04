@@ -23,6 +23,7 @@ import com.headmostlab.notes.model.Note;
 import com.headmostlab.notes.ui.Constants;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Date;
 
 public class NoteFragment extends Fragment {
@@ -32,6 +33,7 @@ public class NoteFragment extends Fragment {
     private NoteViewModel viewModel;
     private boolean isPortrait;
     private OnBackPressedCallback onBackPressedCallback;
+    private Note note;
 
     public static NoteFragment newNoteFragment(Note note) {
         NoteFragment fragment = new NoteFragment();
@@ -83,7 +85,8 @@ public class NoteFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         if (getArguments() != null) {
-            viewModel.setNote(getArguments().getParcelable(NOTE_KEY));
+            note = getArguments().getParcelable(NOTE_KEY);
+            viewModel.setNote(note);
         }
         if (isPortrait) {
             requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), onBackPressedCallback);
@@ -93,10 +96,39 @@ public class NoteFragment extends Fragment {
                 binding.createDate.setText(DateFormat.getDateInstance().format(new Date(selection))));
         binding.createDate.setOnClickListener(v ->
                 picker.show(getParentFragmentManager(), picker.toString()));
-        binding.saveNoteButton.setOnClickListener(it ->
-                viewModel.save(binding.title.getText().toString(),
+        binding.deleteNoteButton.setOnClickListener(it -> {
+            getParentFragmentManager().setFragmentResult(Constants.FRAGMENT_RESULT_DELETE_NOTE, new Bundle());
+            if (isPortrait) {
+                getParentFragmentManager().popBackStack();
+            } else {
+                getParentFragmentManager().beginTransaction().remove(this).commit();
+            }
+        });
+        binding.saveNoteButton.setOnClickListener(it -> {
+            if (note != null) {
+
+                Bundle bundle = new Bundle();
+
+                Date date = null;
+                try {
+                    date = DateFormat.getDateInstance().parse(binding.createDate.getText().toString());
+                } catch (ParseException ignore) {
+                }
+
+                Note updatedNote = new Note(this.note.getId(),
+                        binding.title.getText().toString(),
                         binding.description.getText().toString(),
-                        binding.createDate.getText().toString()));
+                        date
+                );
+
+                bundle.putParcelable(Constants.FRAGMENT_RESULT_NOTE, updatedNote);
+                getParentFragmentManager().setFragmentResult(Constants.FRAGMENT_RESULT_UPDATE_NOTE, bundle);
+
+                if (isPortrait) {
+                    getParentFragmentManager().popBackStack();
+                }
+            }
+        });
         viewModel.getSelectedNote().observe(getViewLifecycleOwner(), note -> show(note));
         viewModel.getNoteToShare().observe(getViewLifecycleOwner(), note -> share(note));
     }

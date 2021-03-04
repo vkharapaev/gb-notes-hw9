@@ -15,6 +15,7 @@ public class NoteListViewModelImpl extends androidx.lifecycle.ViewModel implemen
     private final SavedStateHandle dataStorage;
     private MutableLiveData<ArrayList<Note>> notesLiveData = new MutableLiveData<>();
     private MutableLiveData<Note> selectedNote = new MutableLiveData<>();
+    private MutableLiveData<Integer> deletedNote = new MutableLiveData<>();
 
     public NoteListViewModelImpl(SavedStateHandle savedState) {
         loadNotes();
@@ -44,6 +45,37 @@ public class NoteListViewModelImpl extends androidx.lifecycle.ViewModel implemen
     @Override
     public void deselect() {
         selectedNote.setValue(null);
+    }
+
+    @Override
+    public void deleteNote() {
+        Note note = selectedNote.getValue();
+        if (note != null) {
+            ArrayList<Note> notes = notesLiveData.getValue();
+            for (int i = 0; i < notes.size(); i++) {
+                if (notes.get(i).getId().equals(note.getId())) {
+                    notes.remove(i);
+                    notesLiveData.setValue(notes);
+                    selectedNote.setValue(null);
+                    break;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void updateNote(Note note) {
+        if (note != null) {
+            ArrayList<Note> notes = notesLiveData.getValue();
+            for (int i = 0; i < notes.size(); i++) {
+                if (notes.get(i).getId().equals(note.getId())) {
+                    notes.remove(i);
+                    notes.add(i, note);
+                    notesLiveData.setValue(notes);
+                    break;
+                }
+            }
+        }
     }
 
     private void loadNotes() {

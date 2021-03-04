@@ -2,6 +2,7 @@ package com.headmostlab.notes.ui.notelist;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,8 +45,20 @@ public class NoteListFragment extends Fragment {
         viewModel = new ViewModelProvider(this,
                 new NoteListViewModelFactory(this, null)).get(NoteListViewModelImpl.class);
 
+        getParentFragmentManager().setFragmentResultListener(Constants.FRAGMENT_RESULT_DELETE_NOTE, this,
+                (requestKey, result) -> viewModel.deleteNote());
+
         getParentFragmentManager().setFragmentResultListener(Constants.FRAGMENT_RESULT_BACK_PRESS_IN_EDIT_NOTE, this,
                 (requestKey, result) -> viewModel.deselect());
+
+        getParentFragmentManager().setFragmentResultListener(Constants.FRAGMENT_RESULT_UPDATE_NOTE, this,
+                (requestKey, result) -> {
+                    Note note = (Note)result.getParcelable(Constants.FRAGMENT_RESULT_NOTE);
+                    if (note != null) {
+                        viewModel.updateNote(note);
+                        viewModel.deselect();
+                    }
+                });
     }
 
     @Nullable
