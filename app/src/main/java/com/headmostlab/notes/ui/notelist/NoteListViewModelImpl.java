@@ -35,9 +35,15 @@ public class NoteListViewModelImpl extends androidx.lifecycle.ViewModel implemen
     }
 
     @Override
-    public void selectNote(Note note) {
+    public void selectNote(int position) {
+        Note note = notesLiveData.getValue().get(position);
         selectedNote.setValue(note);
         dataStorage.set(NOTE_KEY, note);
+    }
+
+    @Override
+    public void deselect() {
+        selectedNote.setValue(null);
     }
 
     private void loadNotes() {

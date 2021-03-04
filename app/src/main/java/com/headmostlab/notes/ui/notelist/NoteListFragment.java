@@ -45,7 +45,7 @@ public class NoteListFragment extends Fragment {
                 new NoteListViewModelFactory(this, null)).get(NoteListViewModelImpl.class);
 
         getParentFragmentManager().setFragmentResultListener(Constants.FRAGMENT_RESULT_BACK_PRESS_IN_EDIT_NOTE, this,
-                (requestKey, result) -> viewModel.selectNote(null));
+                (requestKey, result) -> viewModel.deselect());
     }
 
     @Nullable
@@ -141,16 +141,14 @@ public class NoteListFragment extends Fragment {
         public class ViewHolder extends RecyclerView.ViewHolder {
 
             private final NoteRowItemBinding binding;
-            private Note note;
 
             public ViewHolder(NoteRowItemBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
-                binding.itemContainer.setOnClickListener(v -> viewModel.selectNote(note));
+                binding.itemContainer.setOnClickListener(v -> viewModel.selectNote(getAdapterPosition()));
             }
 
             void bind(Note note) {
-                this.note = note;
                 binding.title.setText(note.getTitle());
                 binding.description.setText(note.getDescription());
             }

@@ -11,5 +11,7 @@ public interface NoteListViewModel {
 
     LiveData<Note> getSelectedNote();
 
-    void selectNote(Note note);
+    void selectNote(int position);
+
+    void deselect();
 }
