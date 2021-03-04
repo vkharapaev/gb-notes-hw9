@@ -3,6 +3,7 @@ package com.headmostlab.notes.ui.note;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -10,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -19,6 +21,7 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.headmostlab.notes.R;
 import com.headmostlab.notes.databinding.FragmentNoteBinding;
 import com.headmostlab.notes.model.Note;
+import com.headmostlab.notes.ui.Constants;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -55,6 +58,14 @@ public class NoteFragment extends Fragment {
         }
 
         setHasOptionsMenu(true);
+
+        requireActivity().getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                getParentFragmentManager().popBackStack();
+                getParentFragmentManager().setFragmentResult(Constants.FRAGMENT_RESULT_BACK_PRESS_IN_EDIT_NOTE, new Bundle());
+            }
+        });
     }
 
     @Nullable
@@ -87,9 +98,11 @@ public class NoteFragment extends Fragment {
     }
 
     public void show(Note note) {
-        binding.title.setText(note.getTitle());
-        binding.description.setText(note.getDescription());
-        binding.createDate.setText(DateFormat.getDateInstance().format(note.getCreationDate()));
+        if (note != null) {
+            binding.title.setText(note.getTitle());
+            binding.description.setText(note.getDescription());
+            binding.createDate.setText(DateFormat.getDateInstance().format(note.getCreationDate()));
+        }
     }
 
     public void share(Note note) {

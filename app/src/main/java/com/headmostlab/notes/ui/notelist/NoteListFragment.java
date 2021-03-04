@@ -2,6 +2,7 @@ package com.headmostlab.notes.ui.notelist;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,6 +18,7 @@ import com.headmostlab.notes.R;
 import com.headmostlab.notes.databinding.FragmentNoteListBinding;
 import com.headmostlab.notes.databinding.NoteRowItemBinding;
 import com.headmostlab.notes.model.Note;
+import com.headmostlab.notes.ui.Constants;
 import com.headmostlab.notes.ui.note.NoteFragment;
 
 import java.util.Collections;
@@ -32,6 +35,18 @@ public class NoteListFragment extends Fragment {
         return new NoteListFragment();
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        viewModel = new ViewModelProvider(this,
+                new NoteListViewModelFactory(this, null)).get(NoteListViewModelImpl.class);
+
+        getParentFragmentManager().setFragmentResultListener(Constants.FRAGMENT_RESULT_BACK_PRESS_IN_EDIT_NOTE, this,
+                (requestKey, result) -> {
+                    viewModel.selectNote(null);
+                });
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -42,8 +57,7 @@ public class NoteListFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewModel = new ViewModelProvider(this,
-                new NoteListViewModelFactory(this, null)).get(NoteListViewModelImpl.class);
+        Log.e("TAG", "onViewCreated: NoteListFragment");
         initRecyclerView();
         viewModel.getNotes().observe(getViewLifecycleOwner(), notes -> adapter.setNotes(notes));
         viewModel.getSelectedNote().observe(getViewLifecycleOwner(), note -> show(note));
@@ -63,6 +77,10 @@ public class NoteListFragment extends Fragment {
     }
 
     private void show(Note note) {
+        if (note == null) {
+            return;
+        }
+
         boolean isPortrait = getResources().getConfiguration().orientation ==
                 Configuration.ORIENTATION_PORTRAIT;
 
