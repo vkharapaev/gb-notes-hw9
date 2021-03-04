@@ -127,7 +127,7 @@ public class NoteFragment extends Fragment {
 
             if (isPortrait) {
                 getParentFragmentManager().popBackStack();
-            } else {
+            } else if (note == null) {
                 getParentFragmentManager().beginTransaction().remove(this).commit();
             }
 
