@@ -2,7 +2,6 @@ package com.headmostlab.notes.ui.notelist;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +9,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,6 +28,7 @@ public class NoteListFragment extends Fragment {
     private FragmentNoteListBinding binding;
     private NoteListViewModel viewModel;
     private NoteListAdapter adapter;
+    private boolean isPortrait;
 
     public static NoteListFragment newNoteListFragment() {
         return new NoteListFragment();
@@ -38,13 +37,15 @@ public class NoteListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        isPortrait = getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_PORTRAIT;
+
         viewModel = new ViewModelProvider(this,
                 new NoteListViewModelFactory(this, null)).get(NoteListViewModelImpl.class);
 
         getParentFragmentManager().setFragmentResultListener(Constants.FRAGMENT_RESULT_BACK_PRESS_IN_EDIT_NOTE, this,
-                (requestKey, result) -> {
-                    viewModel.selectNote(null);
-                });
+                (requestKey, result) -> viewModel.selectNote(null));
     }
 
     @Nullable
@@ -57,10 +58,18 @@ public class NoteListFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        Log.e("TAG", "onViewCreated: NoteListFragment");
         initRecyclerView();
         viewModel.getNotes().observe(getViewLifecycleOwner(), notes -> adapter.setNotes(notes));
         viewModel.getSelectedNote().observe(getViewLifecycleOwner(), note -> show(note));
+
+        if (isPortrait) {
+            Fragment noteFragment = getParentFragmentManager().findFragmentByTag(NOTE_TAG);
+            if (noteFragment != null) {
+                getParentFragmentManager().beginTransaction()
+                        .remove(noteFragment)
+                        .commit();
+            }
+        }
     }
 
     private void initRecyclerView() {
@@ -81,9 +90,6 @@ public class NoteListFragment extends Fragment {
             return;
         }
 
-        boolean isPortrait = getResources().getConfiguration().orientation ==
-                Configuration.ORIENTATION_PORTRAIT;
-
         if (isPortrait) {
             getParentFragmentManager()
                     .beginTransaction()
@@ -92,7 +98,7 @@ public class NoteListFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         } else {
-            getChildFragmentManager()
+            getParentFragmentManager()
                     .beginTransaction()
                     .setReorderingAllowed(true)
                     .replace(R.id.childContainer, NoteFragment.newNoteFragment(note), NOTE_TAG)

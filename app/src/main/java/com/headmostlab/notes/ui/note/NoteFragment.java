@@ -3,7 +3,6 @@ package com.headmostlab.notes.ui.note;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,6 +30,7 @@ public class NoteFragment extends Fragment {
     public static final String NOTE_KEY = "NOTE";
     private FragmentNoteBinding binding;
     private NoteViewModel viewModel;
+    private boolean isPortrait;
 
     public static NoteFragment newNoteFragment(Note note) {
         NoteFragment fragment = new NoteFragment();
@@ -44,34 +44,32 @@ public class NoteFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        boolean isPortrait = getResources().getConfiguration().orientation ==
-                Configuration.ORIENTATION_PORTRAIT;
-
-        if (!isPortrait) {
-            getParentFragmentManager().popBackStack();
-        }
-
         viewModel = new ViewModelProvider(this,
                 new NoteViewModelFactory(this, null)).get(NoteViewModelImpl.class);
-        if (getArguments() != null) {
-            viewModel.setNote(getArguments().getParcelable(NOTE_KEY));
-        }
 
         setHasOptionsMenu(true);
 
-        requireActivity().getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                getParentFragmentManager().popBackStack();
-                getParentFragmentManager().setFragmentResult(Constants.FRAGMENT_RESULT_BACK_PRESS_IN_EDIT_NOTE, new Bundle());
-            }
-        });
+        isPortrait = getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_PORTRAIT;
+
+        if (isPortrait) {
+            requireActivity().getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    getParentFragmentManager().setFragmentResult(Constants.FRAGMENT_RESULT_BACK_PRESS_IN_EDIT_NOTE, new Bundle());
+                    getParentFragmentManager().popBackStack();
+                }
+            });
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        if (!isPortrait) {
+            getParentFragmentManager().popBackStack();
+        }
         binding = FragmentNoteBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -84,6 +82,9 @@ public class NoteFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        if (getArguments() != null) {
+            viewModel.setNote(getArguments().getParcelable(NOTE_KEY));
+        }
         MaterialDatePicker<Long> picker = MaterialDatePicker.Builder.datePicker().build();
         picker.addOnPositiveButtonClickListener(selection ->
                 binding.createDate.setText(DateFormat.getDateInstance().format(new Date(selection))));
