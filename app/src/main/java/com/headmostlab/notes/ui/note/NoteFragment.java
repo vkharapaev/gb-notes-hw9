@@ -31,6 +31,7 @@ public class NoteFragment extends Fragment {
     private FragmentNoteBinding binding;
     private NoteViewModel viewModel;
     private boolean isPortrait;
+    private OnBackPressedCallback onBackPressedCallback;
 
     public static NoteFragment newNoteFragment(Note note) {
         NoteFragment fragment = new NoteFragment();
@@ -52,15 +53,13 @@ public class NoteFragment extends Fragment {
         isPortrait = getResources().getConfiguration().orientation ==
                 Configuration.ORIENTATION_PORTRAIT;
 
-        if (isPortrait) {
-            requireActivity().getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
-                @Override
-                public void handleOnBackPressed() {
-                    getParentFragmentManager().setFragmentResult(Constants.FRAGMENT_RESULT_BACK_PRESS_IN_EDIT_NOTE, new Bundle());
-                    getParentFragmentManager().popBackStack();
-                }
-            });
-        }
+        onBackPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                getParentFragmentManager().setFragmentResult(Constants.FRAGMENT_RESULT_BACK_PRESS_IN_EDIT_NOTE, new Bundle());
+                getParentFragmentManager().popBackStack();
+            }
+        };
     }
 
     @Nullable
@@ -77,6 +76,7 @@ public class NoteFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        onBackPressedCallback.remove();
         binding = null;
     }
 
@@ -84,6 +84,9 @@ public class NoteFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         if (getArguments() != null) {
             viewModel.setNote(getArguments().getParcelable(NOTE_KEY));
+        }
+        if (isPortrait) {
+            requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), onBackPressedCallback);
         }
         MaterialDatePicker<Long> picker = MaterialDatePicker.Builder.datePicker().build();
         picker.addOnPositiveButtonClickListener(selection ->
