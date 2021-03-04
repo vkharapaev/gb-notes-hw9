@@ -47,7 +47,7 @@ public class NoteListViewModelImpl extends androidx.lifecycle.ViewModel implemen
     private ArrayList<Note> createNotes() {
         ArrayList<Note> notes = new ArrayList<>();
         for (int i = 1; i <= 100; i++) {
-            notes.add(new Note("Note " + i, "Note " + i + " Description", new Date()));
+            notes.add(new Note(String.valueOf(i), "Note " + i, "Note " + i + " Description", new Date()));
         }
         return notes;
     }

@@ -7,6 +7,7 @@ import android.os.Parcelable;
 import java.util.Date;
 
 public class Note implements Parcelable {
+    private String id;
     private String title;
     private String description;
     private Date creationDate;
@@ -14,13 +15,14 @@ public class Note implements Parcelable {
     public Note() {
     }
 
-    public Note(String title, String description, Date creationDate) {
+    public Note(String id, String title, String description, Date creationDate) {
         this.title = title;
         this.description = description;
         this.creationDate = creationDate;
     }
 
     protected Note(Parcel in) {
+        id = in.readString();
         title = in.readString();
         description = in.readString();
         creationDate = new Date(in.readLong());
@@ -29,18 +31,20 @@ public class Note implements Parcelable {
     @Override
     public String toString() {
         return "Note{" +
-                "title='" + title + '\'' +
+                "id='" + id + '\'' +
+                ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", creationDate=" + creationDate +
                 '}';
     }
 
     public String toHumanString() {
-        return String.format("%s\n%s\n%s", title, description, creationDate);
+        return String.format("%s\n%s\n%s\n%s", id, title, description, creationDate);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
         dest.writeString(title);
         dest.writeString(description);
         dest.writeLong(creationDate.getTime());
@@ -62,6 +66,14 @@ public class Note implements Parcelable {
             return new Note[size];
         }
     };
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getTitle() {
         return title;
@@ -93,6 +105,11 @@ public class Note implements Parcelable {
 
         public Builder() {
             note = new Note();
+        }
+
+        public Builder setId(String id) {
+            note.id = id;
+            return this;
         }
 
         public Builder setTitle(String title) {
