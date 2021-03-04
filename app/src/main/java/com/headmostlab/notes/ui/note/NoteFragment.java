@@ -96,38 +96,40 @@ public class NoteFragment extends Fragment {
                 binding.createDate.setText(DateFormat.getDateInstance().format(new Date(selection))));
         binding.createDate.setOnClickListener(v ->
                 picker.show(getParentFragmentManager(), picker.toString()));
-        binding.deleteNoteButton.setOnClickListener(it -> {
-            getParentFragmentManager().setFragmentResult(Constants.FRAGMENT_RESULT_DELETE_NOTE, new Bundle());
-            if (isPortrait) {
-                getParentFragmentManager().popBackStack();
-            } else {
-                getParentFragmentManager().beginTransaction().remove(this).commit();
-            }
-        });
-        binding.saveNoteButton.setOnClickListener(it -> {
-            if (note != null) {
-
-                Bundle bundle = new Bundle();
-
-                Date date = null;
-                try {
-                    date = DateFormat.getDateInstance().parse(binding.createDate.getText().toString());
-                } catch (ParseException ignore) {
-                }
-
-                Note updatedNote = new Note(this.note.getId(),
-                        binding.title.getText().toString(),
-                        binding.description.getText().toString(),
-                        date
-                );
-
-                bundle.putParcelable(Constants.FRAGMENT_RESULT_NOTE, updatedNote);
-                getParentFragmentManager().setFragmentResult(Constants.FRAGMENT_RESULT_UPDATE_NOTE, bundle);
-
+        if (note == null) {
+            binding.deleteNoteButton.setVisibility(View.GONE);
+        } else {
+            binding.deleteNoteButton.setOnClickListener(it -> {
+                getParentFragmentManager().setFragmentResult(Constants.FRAGMENT_RESULT_DELETE_NOTE, new Bundle());
                 if (isPortrait) {
                     getParentFragmentManager().popBackStack();
+                } else {
+                    getParentFragmentManager().beginTransaction().remove(this).commit();
                 }
+            });
+        }
+        binding.saveNoteButton.setOnClickListener(it -> {
+            Bundle bundle = new Bundle();
+
+            Date date = null;
+            try {
+                date = DateFormat.getDateInstance().parse(binding.createDate.getText().toString());
+            } catch (ParseException ignore) {
             }
+
+            Note updatedNote = new Note(this.note != null ? this.note.getId() : null,
+                    binding.title.getText().toString(),
+                    binding.description.getText().toString(),
+                    date
+            );
+
+            bundle.putParcelable(Constants.FRAGMENT_RESULT_NOTE, updatedNote);
+            getParentFragmentManager().setFragmentResult(Constants.FRAGMENT_RESULT_UPDATE_NOTE, bundle);
+
+            if (isPortrait) {
+                getParentFragmentManager().popBackStack();
+            }
+
         });
         viewModel.getSelectedNote().observe(getViewLifecycleOwner(), note -> show(note));
         viewModel.getNoteToShare().observe(getViewLifecycleOwner(), note -> share(note));

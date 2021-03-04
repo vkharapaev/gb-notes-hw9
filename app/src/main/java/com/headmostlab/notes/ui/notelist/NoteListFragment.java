@@ -83,6 +83,9 @@ public class NoteListFragment extends Fragment {
                         .commit();
             }
         }
+        binding.addNoteButton.setOnClickListener(it -> {
+            addNote();
+        });
     }
 
     private void initRecyclerView() {
@@ -115,6 +118,24 @@ public class NoteListFragment extends Fragment {
                     .beginTransaction()
                     .setReorderingAllowed(true)
                     .replace(R.id.childContainer, NoteFragment.newNoteFragment(note), NOTE_TAG)
+                    .commit();
+        }
+    }
+
+    private void addNote() {
+
+        if (isPortrait) {
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .setReorderingAllowed(true)
+                    .replace(R.id.container, NoteFragment.newNoteFragment(null), NOTE_TAG)
+                    .addToBackStack(null)
+                    .commit();
+        } else {
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .setReorderingAllowed(true)
+                    .replace(R.id.childContainer, NoteFragment.newNoteFragment(null), NOTE_TAG)
                     .commit();
         }
     }

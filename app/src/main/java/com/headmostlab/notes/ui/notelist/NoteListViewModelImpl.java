@@ -16,6 +16,7 @@ public class NoteListViewModelImpl extends androidx.lifecycle.ViewModel implemen
     private MutableLiveData<ArrayList<Note>> notesLiveData = new MutableLiveData<>();
     private MutableLiveData<Note> selectedNote = new MutableLiveData<>();
     private MutableLiveData<Integer> deletedNote = new MutableLiveData<>();
+    private int lastId;
 
     public NoteListViewModelImpl(SavedStateHandle savedState) {
         loadNotes();
@@ -65,14 +66,21 @@ public class NoteListViewModelImpl extends androidx.lifecycle.ViewModel implemen
 
     @Override
     public void updateNote(Note note) {
-        if (note != null) {
-            ArrayList<Note> notes = notesLiveData.getValue();
-            for (int i = 0; i < notes.size(); i++) {
-                if (notes.get(i).getId().equals(note.getId())) {
-                    notes.remove(i);
-                    notes.add(i, note);
-                    notesLiveData.setValue(notes);
-                    break;
+        if (note != null) { // add
+            if (note.getId() == null) {
+                note.setId(nextId());
+                ArrayList<Note> notes = notesLiveData.getValue();
+                notes.add(0, note);
+                notesLiveData.setValue(notes);
+            } else { // update
+                ArrayList<Note> notes = notesLiveData.getValue();
+                for (int i = 0; i < notes.size(); i++) {
+                    if (notes.get(i).getId().equals(note.getId())) {
+                        notes.remove(i);
+                        notes.add(i, note);
+                        notesLiveData.setValue(notes);
+                        break;
+                    }
                 }
             }
         }
@@ -85,8 +93,12 @@ public class NoteListViewModelImpl extends androidx.lifecycle.ViewModel implemen
     private ArrayList<Note> createNotes() {
         ArrayList<Note> notes = new ArrayList<>();
         for (int i = 1; i <= 100; i++) {
-            notes.add(new Note(String.valueOf(i), "Note " + i, "Note " + i + " Description", new Date()));
+            notes.add(new Note(nextId(), "Note " + i, "Note " + i + " Description", new Date()));
         }
         return notes;
+    }
+
+    private String nextId() {
+        return String.valueOf(++lastId);
     }
 }
