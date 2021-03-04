@@ -128,6 +128,8 @@ public class NoteFragment extends Fragment {
 
             if (isPortrait) {
                 getParentFragmentManager().popBackStack();
+            } else {
+                getParentFragmentManager().beginTransaction().remove(this).commit();
             }
 
         });
